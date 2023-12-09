@@ -3,7 +3,7 @@ import numpy as np
 from typing import Iterator
 
 from src.base import AudioStream
-from src.services import generate_sine_wave, midi_note_to_frequency
+from src.services import midi_note_to_frequency, generate_harmonics
 
 
 class ConstantAudioStream(AudioStream):
@@ -26,41 +26,46 @@ class ReadStream(AudioStream):
             yield self.read_stream.current
 
 
-class SineWaveStream(AudioStream):
+class NoteStream(AudioStream):
     def __init__(self, chunk_size: int, sample_rate: int):
         super().__init__(sample_rate=sample_rate, chunk_size=chunk_size)
-        self._volume = 0
-        self._frequency = 0
-
-    def set_volume(self, value: float):
-        self._volume = value
-        return self
-
-    def set_frequency(self, value: float):
-        self._frequency = value
-        return self
-
-    def iterable(self):
-        return generate_sine_wave(
-            self._frequency, chunk_size=self.chunk_size, sample_rate=self.sample_rate, volume=self._volume
-        )
-
-
-class MidiSineWaveStream(SineWaveStream):
-    def __init__(self, chunk_size: int, sample_rate: int):
-        super().__init__(sample_rate=sample_rate, chunk_size=chunk_size)
+        self._harmonic_profile = None
         self._velocity = 0
         self.note = 0
 
     def set_velocity(self, value: int):
         self._velocity = value
-        self.set_volume(value / 127)
         return self
 
     def set_note(self, value: int):
         self.note = value
-        self.set_frequency(midi_note_to_frequency(value))
         return self
+
+    @property
+    def frequency(self):
+        return midi_note_to_frequency(self.note)
+
+    @property
+    def volume(self):
+        return self._velocity / 127
+
+    def add_harmonic_profile(self, harmonics: tuple[tuple[float, float], ...]):
+        """
+        param harmonics: A list of tuples, each tuple containing a harmonic multiple and its relative amplitude.
+                         For example, [(2, 0.5), (3, 0.25)] would add the first and second harmonics at half
+                        and a quarter of the fundamental's amplitude, respectively.
+        """
+        self._harmonic_profile = harmonics
+        return self
+
+    def iterable(self):
+        return generate_harmonics(
+            self.frequency,
+            chunk_size=self.chunk_size,
+            sample_rate=self.sample_rate,
+            volume=self.volume,
+            harmonics_info=self._harmonic_profile
+        )
 
 
 class PlaceholderAudioStream(AudioStream):

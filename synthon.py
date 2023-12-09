@@ -9,8 +9,8 @@ def parse_args():
 
     # Adding arguments for the effect pipeline
     parser.add_argument('--multiplier', type=float, default=0.3, help='Effect multiplier')
-    parser.add_argument('--fade_in', type=int, default=.2, help='Fade-in duration in seconds')
-    parser.add_argument('--fade_out', type=int, default=.2, help='Fade-out duration in seconds')
+    parser.add_argument('--fade_in', type=float, default=.2, help='Fade-in duration in seconds')
+    parser.add_argument('--fade_out', type=float, default=.2, help='Fade-out duration in seconds')
 
     # Arguments for the synthesizer
     parser.add_argument('--sample_rate', type=int, default=44100, help='Sample rate for the synthesizer')
@@ -18,18 +18,12 @@ def parse_args():
 
     # Toggle options
     parser.add_argument('--disable_speaker', action='store_true', help='Disable output to speaker')
-    parser.add_argument('--stream_to_file', action='store_true', help='Enable streaming to a file')
-    parser.add_argument('--filename', type=str, help='Filename for the output file')
+    parser.add_argument('--output', type=str, help='Filename for the output file')
 
     # MIDI handler argument
     parser.add_argument('--port_name', type=str, default='IAC Driver Bus 1', help='MIDI input port name')
 
-    args = parser.parse_args()
-
-    if args.stream_to_file and not args.filename:
-        parser.error("--stream_to_file requires --filename.")
-
-    return args
+    return parser.parse_args()
 
 
 def main():
@@ -45,8 +39,8 @@ def main():
     if not args.disable_speaker:
         output.enable_speaker_playback()
 
-    if args.stream_to_file:
-        output.enable_file_output(args.filename)
+    if args.output:
+        output.enable_file_output(args.output)
 
     # Setting up the synthesizer
     synth = Synthesizer(
