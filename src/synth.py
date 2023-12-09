@@ -24,9 +24,9 @@ class Synthesizer:
         if message.type == 'note_on':
             sine_wave = MidiSineWaveStream(self.chunk_size, self.sample_rate)
             sine_wave.set_note(message.note).set_velocity(message.velocity)
-            self.composer.add_stream(self.effect_pipeline.build(sine_wave), note=message.note)
+            self.composer.add_stream(self.effect_pipeline.build(sine_wave), identifier=message.note)
         elif message.type == 'note_off':
-            self.composer.close_stream(message.note)
+            self.composer.close_stream(identifier=message.note)
 
     def run(self):
         try:
