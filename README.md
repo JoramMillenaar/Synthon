@@ -2,70 +2,49 @@
     <img src="logo.png" alt="drawing" width="250" />
 </p>
 
-# SYNTHON - Python Music Synthesis Toolkit
+# Synthon
 
-This suite of Python scripts offers a range of tools for audio processing and music synthesis. It includes a variety of modules for generating, manipulating, and outputting audio data. While each script has its specific functionality, they collectively form a toolkit for synthesizing and processing audio in Python.
-
-The synthesizer is controlled using MIDI data. If you don't have a MIDI device on hand, checkout my other project [here](https://github.com/jofoks/Virtual-MIDI-Keyboard) to make your PC's keyboard into a MIDI keyboard.
+Synthon is a Python-based synthesizer that seamlessly converts MIDI messages into rich synthesizer sounds. It leverages a custom-built effect pipeline, a sophisticated output handling system, and a MIDI input handler to create an immersive audio experience.
 
 ## Features
 
-- **Command-Line Interface**: Main commands in `synthon.py` for integrating different modules.
-- **Audio Stream Processing**: Base classes for handling audio streams with ease.
-- **MIDI Input Handling**: MIDI input processing capabilities in `midi.py`.
-- **Audio Output Management**: Classes for audio playback and file output in `outputs.py`.
-- **Audio Input Streams**: Various types of audio input streams in `inputs.py`.
-- **Audio Effects**: Multiple audio effects like fade-in, fade-out, delay, and multiplication in `effects.py`.
-- **Synthesizer Functionalities**: Core synthesizer features in `synth.py`.
-- **Effect Pipeline Building**: Constructing and customizing audio effect pipelines in `builder.py`.
+- **Effect Pipeline**: Customize your sound with effects like fade-in, fade-out, and an effect multiplier.
+- **Output Pipeline**: Direct audio output to speakers or save it to a file.
+- **Synthesizer**: High-quality sound generation with adjustable sample rate and chunk size.
+- **MIDI Compatibility**: Use any MIDI input device to control the synthesizer.
 
-## Installation
+## Getting Started
 
-Ensure Python is installed on your system. Depending on the modules, additional libraries may be required. Install them using pip:
+### Prerequisites
 
-```bash
-pip install mido numpy sounddevice
+- Python 3.x
+- MIDI input device (or use our companion project to turn your computer's keyboard into a MIDI device)
+
+### Dependencies
+```
+pip install mido sounddevice numpy
 ```
 
-## Usage
 
-Run the main script from the command line with the necessary options:
+### Usage
+
+Run `synthon.py` with the desired arguments. For example:
 
 ```
-python synthon.py [OPTIONS]
+python synthon.py --multiplier 0.5 --fade_in 0.3 --fade_out 0.3
 ```
 
-Options:
-- `--multiplier`: A float specifying the effect multiplier. Default is 0.3.
-- `--fade_in`: An integer specifying the fade-in duration in seconds. Default is 0.2.
-- `--fade_out`: An integer specifying the fade-out duration in seconds. Default is 0.2.
-- `--sample_rate`: An integer specifying the sample rate for the synthesizer. Default is 44100.
-- `--chunk_size`: An integer specifying the chunk size for the synthesizer. Default is 512.
-- `--disable_speaker`: A flag to disable output to the speaker. It's set to true by default.
-- `--stream_to_file`: A flag to enable streaming to a file. It's set to false by default.
-- `--filename`: A string specifying the filename for the output file. This option is required if `--stream_to_file` is enabled.
-- `--port_name`: A string specifying the MIDI input port name. Default is 'IAC Driver Bus 1'.
+#### Command Line Arguments
 
-Note:
-- The `--stream_to_file` option requires `--filename` to be specified.
-- Default values are used if specific options are not provided.
-### Example
+- `--multiplier`: Set the effect multiplier (default: 0.3)
+- `--fade_in`: Fade-in duration in seconds (default: 0.2)
+- `--fade_out`: Fade-out duration in seconds (default: 0.2)
+- `--sample_rate`: Sample rate for the synthesizer (default: 44100)
+- `--chunk_size`: Chunk size for the synthesizer (default: 512)
+- `--disable_speaker`: Disable output to speaker
+- `--output`: Filename for the output file
+- `--port_name`: MIDI input port name (default: 'IAC Driver Bus 1')
 
-```bash
-python synthon.py --stream_to_file --filename example.wav --fade_in 0.5
-```
+### No MIDI Keyboard?
 
-This command runs the `synthon.py` script with specified options.
-
-## Project Files
-
-- `base.py`: Base classes for audio streaming.
-- `synthon.py`: Main command interface for the toolkit.
-- `composer.py`: Audio stream composition tools.
-- `services.py`: Utility functions for audio processing.
-- `midi.py`: MIDI input handling.
-- `outputs.py`: Audio playback and file output functionalities.
-- `inputs.py`: Different types of audio input streams.
-- `effects.py`: Audio effects implementation.
-- `synth.py`: Core synthesizer functionalities.
-- `builder.py`: Construction of audio effect pipelines.
+If you don't have a MIDI keyboard, check out my [other project](https://github.com/jofoks/Virtual-MIDI-Keyboard) which allows you to turn your computer's keyboard into a MIDI device.
