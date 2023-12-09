@@ -24,7 +24,7 @@ The synthesizer is controlled using MIDI data. If you don't have a MIDI device o
 Ensure Python is installed on your system. Depending on the modules, additional libraries may be required. Install them using pip:
 
 ```bash
-pip install mido numpy
+pip install mido numpy sounddevice
 ```
 
 ## Usage
