@@ -41,7 +41,7 @@ Options:
 - `--fade_out`: An integer specifying the fade-out duration in seconds. Default is 0.2.
 - `--sample_rate`: An integer specifying the sample rate for the synthesizer. Default is 44100.
 - `--chunk_size`: An integer specifying the chunk size for the synthesizer. Default is 512.
-- `--enable_speaker`: A flag to enable output to the speaker. It's set to false by default.
+- `--disable_speaker`: A flag to disable output to the speaker. It's set to true by default.
 - `--stream_to_file`: A flag to enable streaming to a file. It's set to false by default.
 - `--filename`: A string specifying the filename for the output file. This option is required if `--stream_to_file` is enabled.
 - `--port_name`: A string specifying the MIDI input port name. Default is 'IAC Driver Bus 1'.
@@ -52,7 +52,7 @@ Note:
 ### Example
 
 ```bash
-python synthon.py --option1 value1 --option2 value2
+python synthon.py --stream_to_file --filename example.wav --fade_in 0.5
 ```
 
 This command runs the `synthon.py` script with specified options.

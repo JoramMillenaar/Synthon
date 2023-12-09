@@ -17,7 +17,7 @@ def main():
     parser.add_argument('--chunk_size', type=int, default=512, help='Chunk size for the synthesizer')
 
     # Toggle options
-    parser.add_argument('--enable_speaker', action='store_false', help='Enable output to speaker')
+    parser.add_argument('--disable_speaker', action='store_true', help='Disable output to speaker')
     parser.add_argument('--stream_to_file', action='store_true', help='Enable streaming to a file')
     parser.add_argument('--filename', type=str, help='Filename for the output file')
 
@@ -39,7 +39,7 @@ def main():
     synth = Synthesizer(sample_rate=args.sample_rate, chunk_size=args.chunk_size)
     synth.set_effect_pipeline(effects)
 
-    if args.enable_speaker:
+    if not args.disable_speaker:
         synth.enable_speaker_output()
 
     if args.stream_to_file:
