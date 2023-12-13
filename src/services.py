@@ -1,3 +1,5 @@
+from typing import Iterator
+
 import numpy as np
 import sounddevice as sd
 
@@ -26,11 +28,23 @@ def array_to_wav_format(data: np.array):
     return (data * 32767).astype(np.int16).tobytes()
 
 
-def generate_harmonics(base_freq: float, chunk_size: int, sample_rate: int, volume: float,
-                       harmonics_info: tuple[tuple[int, float], ...]):
-    harmonic_gens = []
-    for multiple, amplitude in harmonics_info:
-        harmonic_gens.append(generate_sine_wave(multiple * base_freq, chunk_size, sample_rate, amplitude))
+def buffer_stream(generator: Iterator[np.array], buffer_size: int):
+    """Ensures the yielded chunks are of length 'buffer_size'"""
+    current_buffer = np.array([], dtype=float)
+    for phase_slice in generator:
+        remaining_space = buffer_size - len(current_buffer)
+        if len(phase_slice) <= remaining_space:
+            current_buffer = np.concatenate((current_buffer, phase_slice))
+        else:
+            current_buffer = np.concatenate((current_buffer, phase_slice[:remaining_space]))
+            yield current_buffer
 
-    for chunk in generate_sine_wave(base_freq, chunk_size, sample_rate, volume):
-        yield np.sum(np.array([chunk, *[next(h) for h in harmonic_gens]], dtype=np.float32), axis=0)
+            current_buffer = phase_slice[remaining_space:]
+
+        if len(current_buffer) == buffer_size:
+            yield current_buffer
+            current_buffer = np.array([], dtype=float)
+
+    if len(current_buffer) > 0:
+        padded_buffer = np.pad(current_buffer, (0, buffer_size - len(current_buffer)), mode='constant')
+        yield padded_buffer

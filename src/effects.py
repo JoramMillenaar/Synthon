@@ -1,6 +1,9 @@
+import itertools
+
 import numpy as np
 
 from src.base import AudioStream, AudioStreamDecorator
+from src.services import buffer_stream
 
 
 class FadeInStreamDecorator(AudioStreamDecorator):
@@ -134,3 +137,41 @@ class MergeStreamDecorator(AudioStreamDecorator):
 
     def transform(self, stream_item):
         return np.sum([stream_item, *[next(s) for s in self.other_streams]], axis=0)
+
+
+class ADSRStreamDecorator(AudioStreamDecorator):
+    def __init__(self,
+                 stream: AudioStream,
+                 attack_time: float,
+                 decay_time: float,
+                 release_time: float,
+                 sustain_level: float,
+                 ):
+        super().__init__(stream)
+        self.attack_time = attack_time
+        self.decay_time = decay_time
+        self.release_time = release_time
+        self.sustain_level = sustain_level
+
+        self._gen = buffer_stream(
+            itertools.chain(
+                self._gradient_generator(self.attack_time, start=0, end=1),
+                self._gradient_generator(self.decay_time, start=1, end=self.sustain_level),
+                self._generate_sustain_phase(),
+                self._gradient_generator(self.release_time, start=self.sustain_level, end=0),
+                [np.zeros(self.chunk_size, dtype=np.float32)]
+            ), self.chunk_size
+        )
+
+    def _gradient_generator(self, time: float, start: float = 0, end: float = 1):
+        duration = int(time * self.sample_rate)
+        phase_gradient = np.linspace(start, end, duration)
+        for t in range(0, duration, self.chunk_size):
+            yield phase_gradient[t:t + self.chunk_size]
+
+    def _generate_sustain_phase(self):
+        while not self.is_closing:
+            yield np.ones(self.chunk_size, dtype=np.float32) * self.sustain_level
+
+    def transform(self, stream_item):
+        return stream_item * next(self._gen)

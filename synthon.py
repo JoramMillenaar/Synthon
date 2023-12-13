@@ -1,5 +1,5 @@
 import argparse
-from src.builder import EffectPipeline, OutputPipeline
+from src.builder import NoteProfilePipeline, OutputPipeline
 from src.midi import MidiInputHandler
 from src.synth import Synthesizer
 
@@ -8,9 +8,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Synthesizer and MIDI handler with effects.')
 
     # Adding arguments for the effect pipeline
-    parser.add_argument('--multiplier', type=float, default=0.3, help='Effect multiplier')
-    parser.add_argument('--fade_in', type=float, default=.2, help='Fade-in duration in seconds')
-    parser.add_argument('--fade_out', type=float, default=.2, help='Fade-out duration in seconds')
+    parser.add_argument('--volume', type=float, default=0.3, help='Set output volume of a note')
+
+    parser.add_argument('--attack', type=float, default=0.1, help='Duration of the attack of a note')
+    parser.add_argument('--decay', type=float, default=0.3, help='Duration of the decay of a note')
+    parser.add_argument('--sustain-volume', type=float, default=0.7, help='Volume of the sustain part of a note')
+    parser.add_argument('--release', type=float, default=0.3, help='Duration of the release of a note')
 
     # Arguments for the synthesizer
     parser.add_argument('--sample_rate', type=int, default=44100, help='Sample rate for the synthesizer')
@@ -30,10 +33,14 @@ def main():
     args = parse_args()
 
     # Setting up the effect pipeline
-    effects = EffectPipeline()
-    effects.set_multiplier(args.multiplier)
-    effects.set_fade_in_duration(seconds=args.fade_in)
-    effects.set_fade_out_duration(seconds=args.fade_out)
+    note_pipeline = NoteProfilePipeline()
+    note_pipeline.set_volume(args.volume)
+    note_pipeline.set_adsr(
+        attack_time=args.attack,
+        decay_time=args.decay,
+        sustain_level=args.sustain_volume,
+        release_time=args.release,
+    )
 
     output = OutputPipeline()
     if not args.disable_speaker:
@@ -44,7 +51,7 @@ def main():
 
     # Setting up the synthesizer
     synth = Synthesizer(
-        effect_pipeline=effects,
+        effect_pipeline=note_pipeline,
         output_pipeline=output,
         sample_rate=args.sample_rate,
         chunk_size=args.chunk_size

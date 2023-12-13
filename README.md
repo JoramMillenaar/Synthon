@@ -31,14 +31,16 @@ pip install mido sounddevice numpy
 Run `synthon.py` with the desired arguments. For example:
 
 ```
-python synthon.py --multiplier 0.5 --fade_in 0.3 --fade_out 0.3
+python synthon.py --volume 0.5 --attack 0.01
 ```
 
 #### Command Line Arguments
 
-- `--multiplier`: Set the effect multiplier (default: 0.3)
-- `--fade_in`: Fade-in duration in seconds (default: 0.2)
-- `--fade_out`: Fade-out duration in seconds (default: 0.2)
+- `--volume`: Set a note's volume (default: 0.3)
+- `--attack`: Duration of the attack of a note (default: 0.1)
+- `--decay`: Duration of the decay of a note (default: 0.3)
+- `--sustain-volume`: Relative volume of the sustain part of a note (default: 0.7)
+- `--release`: Duration of the release of a note (default: 0.3)
 - `--sample_rate`: Sample rate for the synthesizer (default: 44100)
 - `--chunk_size`: Chunk size for the synthesizer (default: 512)
 - `--disable_speaker`: Disable output to speaker

@@ -1,13 +1,11 @@
 from abc import ABC
 
-from src.effects import FadeInStreamDecorator, FadeOutStreamDecorator, DelayAudioStreamDecorator, \
-    MultiplyAudioStreamDecorator
 from src.base import AudioStream
+from src.effects import MultiplyAudioStreamDecorator, ADSRStreamDecorator
 from src.outputs import AudioPlaybackDecorator, AudioFileOutputDecorator
 
 
 class DecoratorPipeline(ABC):
-    # TODO: handle states better
     def __init__(self):
         self._decorators = {}
 
@@ -17,18 +15,23 @@ class DecoratorPipeline(ABC):
         return audio_source
 
 
-class EffectPipeline(DecoratorPipeline):
-    def set_fade_in_duration(self, seconds: float):
-        self._decorators['fadeIn'] = lambda s: FadeInStreamDecorator(s).set_fade_duration(seconds)
-
-    def set_fade_out_duration(self, seconds: float):
-        self._decorators['fadeOut'] = lambda s: FadeOutStreamDecorator(s).set_fade_duration(seconds)
-
-    def set_delay_duration(self, seconds: float):
-        self._decorators['delay'] = lambda s: DelayAudioStreamDecorator(s).set_delay_duration(seconds)
-
-    def set_multiplier(self, value: float):
+class NoteProfilePipeline(DecoratorPipeline):
+    def set_volume(self, value: float):
         self._decorators['multiply'] = lambda s: MultiplyAudioStreamDecorator(s).set_multiplier(value)
+
+    def set_adsr(self, attack_time: float, decay_time: float, release_time: float, sustain_level: float):
+        self._decorators['adsr'] = lambda s: ADSRStreamDecorator(
+            s, attack_time=attack_time, decay_time=decay_time, release_time=release_time, sustain_level=sustain_level
+        )
+
+    def set_harmonics(self):
+        raise NotImplementedError
+
+    def set_vibrato(self):
+        raise NotImplementedError
+
+    def set_tremelo(self):
+        raise NotImplementedError
 
 
 class OutputPipeline(DecoratorPipeline):

@@ -1,9 +1,8 @@
-import numpy as np
-
 from typing import Iterator
 
+import numpy as np
+
 from src.base import AudioStream
-from src.services import midi_note_to_frequency, generate_harmonics
 
 
 class ConstantAudioStream(AudioStream):
@@ -26,46 +25,27 @@ class ReadStream(AudioStream):
             yield self.read_stream.current
 
 
-class NoteStream(AudioStream):
+class SineWaveStream(AudioStream):
     def __init__(self, chunk_size: int, sample_rate: int):
         super().__init__(sample_rate=sample_rate, chunk_size=chunk_size)
-        self._harmonic_profile = None
-        self._velocity = 0
-        self.note = 0
+        self.volume = 0
+        self.frequency = 0
 
-    def set_velocity(self, value: int):
-        self._velocity = value
+    def set_volume(self, value: float):
+        self.volume = value
         return self
 
-    def set_note(self, value: int):
-        self.note = value
-        return self
-
-    @property
-    def frequency(self):
-        return midi_note_to_frequency(self.note)
-
-    @property
-    def volume(self):
-        return self._velocity / 127
-
-    def add_harmonic_profile(self, harmonics: tuple[tuple[float, float], ...]):
-        """
-        param harmonics: A list of tuples, each tuple containing a harmonic multiple and its relative amplitude.
-                         For example, [(2, 0.5), (3, 0.25)] would add the first and second harmonics at half
-                        and a quarter of the fundamental's amplitude, respectively.
-        """
-        self._harmonic_profile = harmonics
+    def set_frequency(self, value: float):
+        self.frequency = value
         return self
 
     def iterable(self):
-        return generate_harmonics(
-            self.frequency,
-            chunk_size=self.chunk_size,
-            sample_rate=self.sample_rate,
-            volume=self.volume,
-            harmonics_info=self._harmonic_profile
-        )
+        t = 0
+        while True:
+            samples = np.arange(t, t + self.chunk_size, dtype=np.float32) / self.sample_rate
+            chunk = np.sin(2 * np.pi * self.frequency * samples) * self.volume
+            yield chunk
+            t += self.chunk_size
 
 
 class PlaceholderAudioStream(AudioStream):
