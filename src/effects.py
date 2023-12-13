@@ -33,8 +33,6 @@ class FadeInStreamDecorator(AudioStreamDecorator):
 
 
 class FadeOutStreamDecorator(AudioStreamDecorator):
-    is_infinite = False
-
     def __init__(self, stream: AudioStream):
         super().__init__(stream)
         self._fade_duration = .0
@@ -68,8 +66,6 @@ class FadeOutStreamDecorator(AudioStreamDecorator):
 
 
 class DelayAudioStreamDecorator(AudioStreamDecorator):
-    is_infinite = False
-
     def __init__(self, stream: AudioStream):
         super().__init__(stream)
         self._delayed_duration = .0

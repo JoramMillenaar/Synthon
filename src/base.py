@@ -8,7 +8,6 @@ class AudioStream(Iterator, ABC):
         self.sample_rate = sample_rate
         self.chunk_size = chunk_size
         self.is_closed = False
-        self.is_infinite = True
         self.is_closing = False
         self.current = None
         self._cached_iterable = None
@@ -19,6 +18,9 @@ class AudioStream(Iterator, ABC):
 
     def close(self):
         self.is_closed = True
+
+    def start_closing(self):
+        self.is_closing = True
 
     def __next__(self):
         if self._cached_iterable is None:
@@ -46,6 +48,10 @@ class AudioStreamDecorator(AudioStream, ABC):
     def __next__(self):
         current = super().__next__()
         return self.transform(current)
+
+    def start_closing(self):
+        self.stream.start_closing()
+        super().start_closing()
 
     @abstractmethod
     def transform(self, stream_item):

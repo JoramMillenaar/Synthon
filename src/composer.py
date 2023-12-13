@@ -19,7 +19,7 @@ class AudioStreamComposer(AudioStream):
         if identifier in self._active_streams:
             stream = self._active_streams[identifier]
             del self._active_streams[identifier]
-            stream.is_closing = True
+            stream.start_closing()
             self._closing_streams.append(stream)
 
     def iterable(self):
