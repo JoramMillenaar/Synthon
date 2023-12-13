@@ -24,19 +24,13 @@ class AudioStreamComposer(AudioStream):
 
     def iterable(self):
         while True:
-            agg = []
+            agg = np.zeros(self.chunk_size, dtype=np.float32)
             for s in list(self._active_streams.values()) + self._closing_streams:
                 try:
-                    agg.append(next(s))
+                    agg += next(s)
                 except StopIteration:
                     s.close()
 
             self._closing_streams = [s for s in self._closing_streams if not s.is_closed]
 
-            data = np.array(agg, dtype=np.float32)
-
-            if data.ndim > 1:
-                res = np.sum(data, axis=0)
-                yield res
-            else:
-                yield data
+            yield agg
