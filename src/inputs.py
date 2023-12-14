@@ -3,6 +3,7 @@ from typing import Iterator
 import numpy as np
 
 from src.base import AudioStream
+from src.composer import AudioStreamComposer
 
 
 class ConstantAudioStream(AudioStream):
@@ -46,6 +47,36 @@ class SineWaveStream(AudioStream):
             chunk = np.sin(2 * np.pi * self.frequency * samples) * self.volume
             yield chunk
             t += self.chunk_size
+
+
+class HarmonicStream(AudioStream):
+    def __init__(self,
+                 harmonics: dict[int, float],
+                 effect_pipeline,
+                 frequency: float,
+                 volume: float,
+                 chunk_size: int,
+                 sample_rate: int
+                 ):
+        super().__init__(sample_rate=sample_rate, chunk_size=chunk_size)
+        self.volume = volume
+        self.frequency = frequency
+        self.harmonics = harmonics
+        self.effect_pipeline = effect_pipeline
+        self.composer = AudioStreamComposer(sample_rate, chunk_size)
+        self._prime_composer()
+
+    def _prime_composer(self):
+        for multiple, amplitude in self.harmonics.items():
+            stream = self.effect_pipeline.build(frequency=self.frequency * multiple, volume=amplitude)
+            self.composer.add_stream(stream, identifier=multiple)
+
+    def iterable(self):
+        return self.composer
+
+    def start_closing(self):
+        self.composer.start_closing()
+        super().start_closing()
 
 
 class PlaceholderAudioStream(AudioStream):

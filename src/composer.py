@@ -16,11 +16,15 @@ class AudioStreamComposer(AudioStream):
             self._active_streams[identifier] = stream
 
     def close_stream(self, identifier: Hashable):
-        if identifier in self._active_streams:
-            stream = self._active_streams[identifier]
+        if stream := self._active_streams.get(identifier):
             del self._active_streams[identifier]
             stream.start_closing()
             self._closing_streams.append(stream)
+
+    def start_closing(self):
+        for key in list(self._active_streams.keys()):
+            self.close_stream(key)
+        super().start_closing()
 
     def iterable(self):
         while True:

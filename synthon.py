@@ -1,5 +1,6 @@
 import argparse
-from src.builder import NoteProfilePipeline, OutputPipeline
+
+from src.builder import NoteAudioStreamBuilder, OutputPipeline
 from src.midi import MidiInputHandler
 from src.synth import Synthesizer
 
@@ -33,7 +34,7 @@ def main():
     args = parse_args()
 
     # Setting up the effect pipeline
-    note_pipeline = NoteProfilePipeline()
+    note_pipeline = NoteAudioStreamBuilder(sample_rate=args.sample_rate, chunk_size=args.chunk_size)
     note_pipeline.set_volume(args.volume)
     note_pipeline.set_adsr(
         attack_time=args.attack,
@@ -41,6 +42,7 @@ def main():
         sustain_level=args.sustain_volume,
         release_time=args.release,
     )
+    note_pipeline.set_harmonics({0.5: 0.1, 2: 0.8, 3: 0.7, 5: 0.3, 6: 0.1})
 
     output = OutputPipeline()
     if not args.disable_speaker:
