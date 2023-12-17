@@ -3,8 +3,14 @@
 </p>
 
 # Synthon
+Synthon transforms your MIDI inputs into a symphony of synthesized sounds, all powered by Python. Dive into a world where digital audio meets creativity, with a synthesizer that's as versatile as it is powerful. Whether you're a musician, a hobbyist, or an audio enthusiast, Synthon offers an immersive experience in sound synthesis.
 
-Synthon is a Python-based synthesizer that seamlessly converts MIDI messages into rich synthesizer sounds. It leverages a custom-built effect pipeline, a sophisticated output handling system, and a MIDI input handler to create an immersive audio experience.
+## Key Highlights
+- 🎚️ **Customizable Timbre**: Craft your unique sound with adjustable ADSR envelopes, vibrato, tremolo, and harmonics.
+- 🎧 **Real-Time MIDI Support**: Connect any MIDI device and turn keystrokes into music.
+- 🔊 **Robust Output Pipeline**: Direct your audio masterpiece to speakers or record it seamlessly.
+- 🛠️ **Fine-Tune Your Experience**: Full control over sample rate, chunk size, and volume, all through an intuitive command-line interface.
+- 📁 **Save Your Creations**: Output your audio directly to a file for easy sharing and editing.
 
 ## Features
 
