@@ -2,7 +2,8 @@
     <img src="logo.png" alt="drawing" width="250" />
 </p>
 
-# Synthon
+# Synthon: The Dynamic Python Synthesizer 🎹🎶
+
 Synthon transforms your MIDI inputs into a symphony of synthesized sounds, all powered by Python. Dive into a world where digital audio meets creativity, with a synthesizer that's as versatile as it is powerful. Whether you're a musician, a hobbyist, or an audio enthusiast, Synthon offers an immersive experience in sound synthesis.
 
 ## Key Highlights
