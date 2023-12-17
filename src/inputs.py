@@ -1,60 +1,26 @@
-from typing import Iterator
-
-import numpy as np
-
 from src.base import AudioStream
 from src.composer import AudioStreamComposer
-
-
-class ConstantAudioStream(AudioStream):
-    def __init__(self, audio_chunk, sample_rate: int):
-        super().__init__(chunk_size=len(audio_chunk), sample_rate=sample_rate)
-        self.audio_chunk = audio_chunk
-
-    def iterable(self) -> Iterator:
-        while True:
-            yield self.audio_chunk
-
-
-class ReadStream(AudioStream):
-    def __init__(self, read_stream: AudioStream):
-        super().__init__(sample_rate=read_stream.sample_rate, chunk_size=read_stream.chunk_size)
-        self.read_stream = read_stream
-
-    def iterable(self) -> Iterator:
-        while True:
-            yield self.read_stream.current
+from src.dataclasses import Harmonic, ADSRProfile, Timbre
+from src.effects import ADSRStreamDecorator, VibratoDecorator, TremoloDecorator
+from src.services import generate_sine_wave
 
 
 class SineWaveStream(AudioStream):
-    def __init__(self, chunk_size: int, sample_rate: int):
+    def __init__(self, frequency: float, amplitude: float, chunk_size: int, sample_rate: int):
         super().__init__(sample_rate=sample_rate, chunk_size=chunk_size)
-        self.volume = 0
-        self.frequency = 0
-
-    def set_volume(self, value: float):
-        self.volume = value
-        return self
-
-    def set_frequency(self, value: float):
-        self.frequency = value
-        return self
+        self.amplitude = amplitude
+        self.frequency = frequency
 
     def iterable(self):
-        t = 0
-        while True:
-            samples = np.arange(t, t + self.chunk_size, dtype=np.float32) / self.sample_rate
-            chunk = np.sin(2 * np.pi * self.frequency * samples) * self.volume
-            yield chunk
-            t += self.chunk_size
+        return generate_sine_wave(self.frequency, self.chunk_size, self.sample_rate, self.amplitude)
 
 
 class HarmonicStream(AudioStream):
     def __init__(self,
-                 harmonics: dict[int, float],
-                 effect_pipeline,
                  frequency: float,
                  volume: float,
+                 harmonics: tuple[Harmonic],
+                 envelope: ADSRProfile,
                  chunk_size: int,
                  sample_rate: int
                  ):
@@ -62,14 +28,20 @@ class HarmonicStream(AudioStream):
         self.volume = volume
         self.frequency = frequency
         self.harmonics = harmonics
-        self.effect_pipeline = effect_pipeline
+        self.envelope = envelope
         self.composer = AudioStreamComposer(sample_rate, chunk_size)
         self._prime_composer()
 
     def _prime_composer(self):
-        for multiple, amplitude in self.harmonics.items():
-            stream = self.effect_pipeline.build(frequency=self.frequency * multiple, volume=amplitude)
-            self.composer.add_stream(stream, identifier=multiple)
+        for harmonic in self.harmonics:
+            stream = SineWaveStream(
+                frequency=self.frequency * harmonic.multiple,
+                amplitude=harmonic.amplitude * self.volume,
+                chunk_size=self.chunk_size,
+                sample_rate=self.sample_rate
+            )
+            stream = ADSRStreamDecorator(stream, profile=self.envelope)
+            self.composer.add_stream(stream, identifier=harmonic.multiple)
 
     def iterable(self):
         return self.composer
@@ -79,14 +51,33 @@ class HarmonicStream(AudioStream):
         super().start_closing()
 
 
-class PlaceholderAudioStream(AudioStream):
-    def __init__(self, chunk_size: int, sample_rate: int):
+class TimbredNoteStream(AudioStream):
+    def __init__(self, frequency: float, amplitude: float, timbre_profile: Timbre, chunk_size: int, sample_rate: int):
         super().__init__(sample_rate=sample_rate, chunk_size=chunk_size)
-        self.current_stream = ConstantAudioStream(np.zeros(chunk_size, dtype=np.float32), sample_rate)
+        self.stream = SineWaveStream(
+            frequency=frequency,
+            amplitude=amplitude,
+            chunk_size=chunk_size,
+            sample_rate=sample_rate
+        )
 
-    def set_stream(self, new_stream: AudioStream):
-        self.current_stream = new_stream
+        if timbre_profile.harmonics:
+            self.stream = HarmonicStream(
+                frequency=frequency,
+                volume=amplitude,
+                harmonics=timbre_profile.harmonics,
+                envelope=timbre_profile.envelope,
+                sample_rate=self.sample_rate,
+                chunk_size=self.chunk_size
+            )
+        else:
+            self.stream = ADSRStreamDecorator(self.stream, timbre_profile.envelope)
 
-    def iterable(self) -> Iterator:
-        while True:
-            yield from self.current_stream
+        if timbre_profile.vibrato:
+            self.stream = VibratoDecorator(self.stream, profile=timbre_profile.vibrato)
+
+        if timbre_profile.tremolo:
+            self.stream = TremoloDecorator(self.stream, profile=timbre_profile.tremolo)
+
+    def iterable(self):
+        return self.stream
