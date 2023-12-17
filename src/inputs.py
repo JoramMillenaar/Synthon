@@ -79,5 +79,9 @@ class TimbredNoteStream(AudioStream):
         if timbre_profile.tremolo:
             self.stream = TremoloDecorator(self.stream, profile=timbre_profile.tremolo)
 
+    def start_closing(self):
+        self.stream.start_closing()
+        super().start_closing()
+
     def iterable(self):
         return self.stream

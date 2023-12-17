@@ -6,8 +6,7 @@ default_timbre = Timbre(
         decay=0.4,  # Moderate decay
         sustain_amplitude=0.7,  # Sustain at 70% amplitude
         release=0.5,  # Somewhat prolonged release
-        sustain=2.0,  # Sustain for 2 seconds
-        sustain_till_close=False,
+        sustain_till_close=True,
     ),
     vibrato=Vibrato(
         rate=5.5,  # Vibrato rate in Hz
