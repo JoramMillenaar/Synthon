@@ -2,7 +2,7 @@
     <img src="logo.png" alt="drawing" width="250" />
 </p>
 
-# Synthon
+# Synthon: The Dynamic Python Synthesizer 🎹🎶
 
 Synthon is a Python-based synthesizer that seamlessly converts MIDI messages into rich synthesizer sounds. It leverages a custom-built effect pipeline, a sophisticated output handling system, and a MIDI input handler to create an immersive audio experience.
 
