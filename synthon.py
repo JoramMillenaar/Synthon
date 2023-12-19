@@ -44,7 +44,8 @@ def parse_args():
     parser.add_argument('--port-name', type=str, default='IAC Driver Bus 1', help='MIDI input port name')
 
     parser, user_args = parser, parser.parse_args()
-    provided_args = {arg for arg in vars(user_args)}
+    user_args, unknown = parser.parse_known_args()
+    provided_args = {arg for arg in vars(user_args) if getattr(user_args, arg) != parser.get_default(arg)}
 
     # Load template if specified
     if user_args.template:
