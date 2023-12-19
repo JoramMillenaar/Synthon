@@ -1,6 +1,6 @@
 {
     "volume": 0.5,
-    "sample-rate": 48000,
+    "sample-rate": 44100,
     "chunk_size": 1024,
     "attack": 0.1,
     "decay": 0.4,
