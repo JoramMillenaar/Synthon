@@ -1,0 +1,19 @@
+{
+    "volume": 0.5,
+    "sample-rate": 48000,
+    "chunk_size": 1024,
+    "attack": 0.1,
+    "decay": 0.4,
+    "sustain-amplitude": 0.7,
+    "release": 0.5,
+    "vibrato-rate": 6.0,
+    "vibrato-depth": 0.05,
+    "tremolo-rate": 4.0,
+    "tremolo-depth": 0.15,
+    "harmonic": [
+        [2, 0.5, null],
+        [3, 0.3, 0.8]
+    ]
+}
+
+

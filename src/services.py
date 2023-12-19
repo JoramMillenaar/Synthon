@@ -1,8 +1,13 @@
+import json
+import os
 from typing import Iterator
 
 import numpy as np
 import sounddevice as sd
 
+
+PROJECT_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEMPLATES_DIR = os.path.join(PROJECT_ROOT_DIR, 'templates')
 BASE_A4 = 440
 
 
@@ -48,3 +53,18 @@ def buffer_stream(generator: Iterator[np.array], buffer_size: int):
     if len(current_buffer) > 0:
         padded_buffer = np.pad(current_buffer, (0, buffer_size - len(current_buffer)), mode='constant')
         yield padded_buffer
+
+
+def load_template(filepath):
+    full_path = os.path.join(TEMPLATES_DIR, filepath)
+    if not os.path.exists(full_path):
+        raise FileNotFoundError(f"Template file '{full_path}' not found.")
+
+    with open(full_path, 'r') as file:
+        template = json.load(file)
+
+    # Special handling for harmonics
+    if 'harmonic' in template:
+        template['harmonic'] = [','.join(map(str, h)) for h in template['harmonic']]
+
+    return template

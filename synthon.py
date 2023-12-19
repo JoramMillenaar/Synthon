@@ -4,11 +4,14 @@ from src.builder import OutputPipeline
 from src.dataclasses import Timbre, ADSRProfile, Vibrato, Tremolo, Harmonic
 from src.midi import MidiInputHandler
 from src.notes import MusicNoteFactory
+from src.services import load_template
 from src.synth import Synthesizer
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Synthesizer and MIDI handler with effects.')
+
+    parser.add_argument('--template', type=str, help='JSON template file (e.g. "default.json")')
 
     # Synth configuration
     parser.add_argument('--volume', type=float, default=0.3, help='Set output volume of a note')
@@ -40,7 +43,17 @@ def parse_args():
     # MIDI handler argument
     parser.add_argument('--port-name', type=str, default='IAC Driver Bus 1', help='MIDI input port name')
 
-    return parser.parse_args()
+    parser, user_args = parser, parser.parse_args()
+    provided_args = {arg for arg in vars(user_args)}
+
+    # Load template if specified
+    if user_args.template:
+        template_settings = load_template(user_args.template)
+        for key, value in template_settings.items():
+            if key not in provided_args:
+                setattr(user_args, key, value)
+
+    return user_args
 
 
 def _parse_harmonics(args):
@@ -58,10 +71,8 @@ def _parse_harmonics(args):
     return harmonics
 
 
-def main():
-    args = parse_args()
-
-    timbre = Timbre(
+def create_timbre(args):
+    return Timbre(
         envelope=ADSRProfile(
             attack=args.attack,
             decay=args.decay,
@@ -70,17 +81,18 @@ def main():
             release=args.release,
             sustain_till_close=not args.sustain,
         ),
-        vibrato=Vibrato(
-            rate=args.vibrato_rate,
-            depth=args.vibrato_depth,
-        ),
-        tremolo=Tremolo(
-            rate=args.tremolo_rate,
-            depth=args.tremolo_depth,
-        ),
+        vibrato=Vibrato(rate=args.vibrato_rate,
+                        depth=args.vibrato_depth) if args.vibrato_rate and args.vibrato_depth else None,
+        tremolo=Tremolo(rate=args.tremolo_rate,
+                        depth=args.tremolo_depth) if args.tremolo_rate and args.tremolo_depth else None,
         harmonics=tuple(_parse_harmonics(args))
     )
 
+
+def main():
+    args = parse_args()
+
+    timbre = create_timbre(args)
     note_factory = MusicNoteFactory(sample_rate=args.sample_rate, chunk_size=args.chunk_size, timbre=timbre)
 
     output = OutputPipeline()
