@@ -4,7 +4,7 @@ import numpy as np
 
 from src.base import AudioStream, AudioStreamDecorator
 from src.dataclasses import Vibrato, Tremolo, ADSRProfile
-from src.services import buffer_stream
+from src.services import buffer_stream, generate_sine_wave
 
 
 class ADSRStreamDecorator(AudioStreamDecorator):
@@ -45,18 +45,15 @@ class VibratoDecorator(AudioStreamDecorator):
     def __init__(self, stream: AudioStream, profile: Vibrato):
         super().__init__(stream)
         self.profile = profile
-        self.lfo_phase = 0  # (Low-Frequency Oscillator)
-
-    def compute_lfo(self):
-        t = np.arange(self.chunk_size) / self.sample_rate
-        lfo = np.sin(2 * np.pi * self.profile.rate * t + self.lfo_phase)
-        self.lfo_phase += 2 * np.pi * self.profile.rate * self.chunk_size / self.sample_rate
-        self.lfo_phase %= 2 * np.pi
-        return lfo
+        self.sine_gen = generate_sine_wave(
+            freq=self.profile.rate,
+            volume=self.profile.depth,
+            sample_rate=self.sample_rate,
+            chunk_size=self.chunk_size,
+        )
 
     def transform(self, stream_item):
-        lfo = self.compute_lfo()
-        vibrato_effect = 1 + self.profile.depth * lfo
+        vibrato_effect = 1 + self.profile.depth * next(self.sine_gen)
         return stream_item * vibrato_effect
 
 
@@ -64,16 +61,13 @@ class TremoloDecorator(AudioStreamDecorator):
     def __init__(self, stream: AudioStream, profile: Tremolo):
         super().__init__(stream)
         self.profile = profile
-        self.lfo_phase = 0  # (Low-Frequency Oscillator)
-
-    def compute_lfo(self):
-        t = np.arange(self.chunk_size) / self.sample_rate
-        lfo = np.sin(2 * np.pi * self.profile.rate * t + self.lfo_phase)
-        self.lfo_phase += 2 * np.pi * self.profile.rate * self.chunk_size / self.sample_rate
-        self.lfo_phase %= 2 * np.pi
-        return lfo
+        self.sine_gen = generate_sine_wave(
+            freq=self.profile.rate,
+            volume=self.profile.depth,
+            sample_rate=self.sample_rate,
+            chunk_size=self.chunk_size,
+        )
 
     def transform(self, stream_item):
-        lfo = self.compute_lfo()
-        tremolo_effect = 1 - self.profile.depth + self.profile.depth * lfo
+        tremolo_effect = 1 - self.profile.depth + self.profile.depth * next(self.sine_gen)
         return stream_item * tremolo_effect

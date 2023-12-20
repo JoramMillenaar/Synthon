@@ -73,10 +73,10 @@ class TimbredNoteStream(AudioStream):
         else:
             self.stream = ADSRStreamDecorator(self.stream, timbre_profile.envelope)
 
-        if timbre_profile.vibrato:
+        if timbre_profile.vibrato and timbre_profile.vibrato.rate and timbre_profile.vibrato.depth:
             self.stream = VibratoDecorator(self.stream, profile=timbre_profile.vibrato)
 
-        if timbre_profile.tremolo:
+        if timbre_profile.tremolo and timbre_profile.tremolo.rate and timbre_profile.tremolo.depth:
             self.stream = TremoloDecorator(self.stream, profile=timbre_profile.tremolo)
 
     def start_closing(self):

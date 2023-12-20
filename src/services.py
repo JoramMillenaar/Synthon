@@ -3,8 +3,6 @@ import os
 from typing import Iterator
 
 import numpy as np
-import sounddevice as sd
-
 
 PROJECT_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_DIR = os.path.join(PROJECT_ROOT_DIR, 'templates')
@@ -22,10 +20,6 @@ def generate_sine_wave(freq: float, chunk_size: int, sample_rate: int, volume: f
         chunk = np.sin(2 * np.pi * freq * samples) * volume
         yield chunk
         t += chunk_size
-
-
-def play_sound(output_device: sd.RawOutputStream, chunk: np.array):
-    output_device.write(np.clip(chunk, -1, 1))
 
 
 def array_to_wav_format(data: np.array):

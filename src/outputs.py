@@ -4,7 +4,7 @@ import wave
 import numpy as np
 import sounddevice as sd
 
-from src.services import play_sound, array_to_wav_format
+from src.services import array_to_wav_format
 from src.base import AudioStreamDecorator, AudioStream
 
 
@@ -24,7 +24,7 @@ class AudioPlaybackDecorator(AudioStreamDecorator):
         return stream_item
 
     def play(self, current):
-        play_sound(self.output, current)
+        self.output.write(np.clip(current, -1, 1))
 
     def close(self):
         self.output.close()
