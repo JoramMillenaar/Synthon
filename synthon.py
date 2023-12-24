@@ -1,11 +1,12 @@
 import argparse
 
-from src.builder import OutputPipeline
 from src.dataclasses import Timbre, ADSRProfile, Vibrato, Tremolo, Harmonic
+from src.effects import MultiplyAudioStreamDecorator
 from src.midi import MidiInputHandler
 from src.notes import MusicNoteFactory
+from src.outputs import AudioPlaybackDecorator, AudioFileOutputDecorator
 from src.services import load_template
-from src.synth import Synthesizer
+from src.synth import SynthesizerStream
 
 
 def parse_args():
@@ -93,29 +94,27 @@ def create_timbre(args):
 def main():
     args = parse_args()
 
-    timbre = create_timbre(args)
-    note_factory = MusicNoteFactory(sample_rate=args.sample_rate, chunk_size=args.chunk_size, timbre=timbre)
+    note_factory = MusicNoteFactory(
+        sample_rate=args.sample_rate,
+        chunk_size=args.chunk_size,
+        timbre=create_timbre(args)
+    )
 
-    output = OutputPipeline()
-    if not args.disable_speaker:
-        output.enable_speaker_playback()
-
-    if args.output:
-        output.enable_file_output(args.output)
-
-    synth = Synthesizer(
-        volume=args.volume,
+    stream = SynthesizerStream(
         note_factory=note_factory,
-        output_pipeline=output,
+        midi_handler=MidiInputHandler(port_name=args.port_name),
         sample_rate=args.sample_rate,
         chunk_size=args.chunk_size
     )
+    stream = MultiplyAudioStreamDecorator(stream, multiplier=args.volume)
+    if not args.disable_speaker:
+        stream = AudioPlaybackDecorator(stream)
 
-    midi_handler = MidiInputHandler(port_name=args.port_name)
-    midi_handler.register_observer(synth.handle_midi_message, channel=0)
+    if args.output:
+        stream = AudioFileOutputDecorator(stream, filename=args.output)
 
     print('Started the Synth!')
-    synth.run()
+    stream.run()
 
 
 if __name__ == "__main__":

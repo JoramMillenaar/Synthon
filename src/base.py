@@ -36,6 +36,14 @@ class AudioStream(Iterator, ABC):
             raise
         return self.current
 
+    def run(self):
+        try:
+            while True:
+                next(self)
+        except KeyboardInterrupt:
+            self.close()
+            raise
+
     def __del__(self):
         self.close()
 

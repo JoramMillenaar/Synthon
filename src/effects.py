@@ -71,3 +71,12 @@ class TremoloDecorator(AudioStreamDecorator):
     def transform(self, stream_item):
         tremolo_effect = 1 - self.profile.depth + self.profile.depth * next(self.sine_gen)
         return stream_item * tremolo_effect
+
+
+class MultiplyAudioStreamDecorator(AudioStreamDecorator):
+    def __init__(self, stream: AudioStream, multiplier: float):
+        super().__init__(stream)
+        self.multiplier = multiplier
+
+    def transform(self, stream_item):
+        return stream_item * self.multiplier

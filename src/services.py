@@ -15,9 +15,10 @@ def midi_note_to_frequency(note: int) -> float:
 
 def generate_sine_wave(freq: float, chunk_size: int, sample_rate: int, volume: float):
     t = 0
+    omega = 2 * np.pi * freq
     while True:
         samples = np.arange(t, t + chunk_size, dtype=np.float32) / sample_rate
-        chunk = np.sin(2 * np.pi * freq * samples) * volume
+        chunk = np.sin(omega * samples) * volume
         yield chunk
         t += chunk_size
 
